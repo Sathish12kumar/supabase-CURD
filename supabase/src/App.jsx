@@ -71,7 +71,12 @@ function App() {
       await auth();
     };
     initial();
-  }, [editbtn]);
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setlogged(true);
+      } else setlogged(false);
+    });
+  }, []);
 
   useEffect(() => {
     document.documentElement.className = `${theme}-theme`;

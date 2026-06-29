@@ -43,6 +43,28 @@ a {
   text-decoration: none;
 }
 
+.toast {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  color: #111827;
+  gap: 10px;
+  border-radius: 10px;
+}
+
+.toast-btn {
+  background: #f3f4f6;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.toast-btn:hover {
+  background: #e5e7eb;
+}
+
 .log {
   color: var(--primary);
   height: 80vh;

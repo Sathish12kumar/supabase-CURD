@@ -19,15 +19,28 @@ const Signin = () => {
         email: formdata.email,
         password: formdata.password,
       });
-
       if (error) {
         toast.error(error.message);
         return;
       }
-
       if (data.user) {
         toast.success("Signup successful");
       }
+      toast(
+        (t) => (
+          <div className="toast">
+            <span className="toast-text">
+              Please <b>sign in</b> to access your account
+            </span>
+            <button className="toast-btn" onClick={() => toast.dismiss(t.id)}>
+              ✕
+            </button>
+          </div>
+        ),
+        {
+          duration: Infinity,
+        },
+      );
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formdata.email,
@@ -44,7 +57,6 @@ const Signin = () => {
         toast.success("Signin successful");
       }
     }
-
     setformdata({ email: "", password: "" });
   };
   return (
@@ -59,6 +71,7 @@ const Signin = () => {
               id="email"
               placeholder="Enter Email"
               required
+              value={formdata.email}
               onChange={(e) =>
                 setformdata((val) => ({ ...val, email: e.target.value }))
               }
@@ -72,6 +85,7 @@ const Signin = () => {
               minLength={6}
               pattern="^(?=.*[A-Za-z]).{6,}$"
               // maxLength={6}
+              value={formdata.password}
               required
               placeholder="Enter Password"
               title="Enter atlest 1 letter"
