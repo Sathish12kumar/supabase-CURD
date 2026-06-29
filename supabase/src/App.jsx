@@ -4,21 +4,20 @@ import { supabase } from "./component/Supabase";
 import TaskInput from "./component/TaskInput";
 import Navbar from "./component/Navbar";
 import Task from "./component/Task";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
 
 function App() {
   const [notes, setnotes] = useState([]);
   const [logged, setlogged] = useState(false);
   const [email, setemail] = useState("");
-
+  const [editbtn, seteditbtn] = useState(0);
+  const [popup, setpopup] = useState(false);
   const [theme, setTheme] = useState("blue");
 
   const handleChildData = (value) => {
     setTheme(value);
   };
-
-  const [popup, setpopup] = useState(false);
 
   const auth = async () => {
     const authlayer = await supabase.auth.getSession();
@@ -40,13 +39,39 @@ function App() {
     setnotes(data);
   };
 
+  const [edited, setedited] = useState({
+    title: "",
+    description: "",
+  });
+
+  const editnote = async (id) => {
+    if (edited.description.trim() != "" && edited.title.trim() != "") {
+      const { error } = await supabase
+        .from("notes")
+        .update(edited)
+        .eq("id", id)
+        .select();
+
+      if (error) {
+        toast.error(error.message);
+      } else toast.success("Note Updated!");
+    } else toast.error("Edit title & description fields");
+  };
+
+  const deletenote = async (id) => {
+    const { error } = await supabase.from("notes").delete().eq("id", id);
+    if (error) {
+      toast.error(error.message);
+    } else toast.success("Deleted successfully");
+  };
+
   useEffect(() => {
     const initial = async () => {
       await fetchdata();
       await auth();
     };
     initial();
-  }, []);
+  }, [editbtn]);
 
   useEffect(() => {
     document.documentElement.className = `${theme}-theme`;
@@ -62,14 +87,11 @@ function App() {
           schema: "public",
           table: "notes",
         },
-        (res) => {
-          const newNote = res.new;
-          setnotes((prev) => [...prev, newNote]);
+        () => {
+          fetchdata();
         },
       )
-      .subscribe((status) => {
-        console.log("subscribe:", status);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -78,13 +100,6 @@ function App() {
 
   return (
     <>
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-        toastOptions={{
-          duration: 2000,
-        }}
-      />
       <Navbar sendToParent={handleChildData} logged={logged} email={email} />
 
       {logged ? (
@@ -95,7 +110,16 @@ function App() {
           </div>
 
           {notes?.map((v) => (
-            <Task value={v} key={v.id} />
+            <Task
+              key={v.id}
+              value={v}
+              editbtn={editbtn}
+              seteditbtn={seteditbtn}
+              edited={edited}
+              setedited={setedited}
+              editnote={editnote}
+              deletenote={deletenote}
+            />
           ))}
         </div>
       ) : (

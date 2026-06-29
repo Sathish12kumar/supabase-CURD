@@ -1,43 +1,22 @@
-import { useState } from "react";
-import { supabase } from "./Supabase";
-import toast from "react-hot-toast";
-
-const Task = ({ value }) => {
-  const [editbtn, seteditbtn] = useState("");
-  const [edited, setedited] = useState({
-    title: "",
-    description: "",
-  });
-
-  const updatenote = (id) => {
-    seteditbtn(id);
-  };
-
-  const editnote = async (id) => {
-    if (edited.description.trim() != "" && edited.title.trim() != "") {
-      const { error } = await supabase
-        .from("notes")
-        .update(edited)
-        .eq("id", id)
-        .select();
-
-      if (error) {
-        toast.error(error.message);
-      } else toast.success("Note Updated!");
-    } else toast.error("Enter fields");
-  };
-
-  const deletenote = async (id) => {
-    const { error } = await supabase.from("notes").delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      console.log(error.message);
-    } else toast.success("Deleted successfully");
+const Task = ({
+  value,
+  editbtn,
+  seteditbtn,
+  setedited,
+  editnote,
+  deletenote,
+}) => {
+  const editnotes = (num) => {
+    editnote(num);
+    seteditbtn(0);
   };
   return (
     <div key={value.id} className="notes">
       <div className="btns">
-        <button onClick={() => updatenote(value.id)} className="edit-btn">
+        <button
+          onClick={() => seteditbtn(Number(value.id))}
+          className="edit-btn"
+        >
           <i className="fa-regular fa-pen-to-square"></i>
         </button>
         <button onClick={() => deletenote(value.id)} className="drop-btn">
@@ -46,7 +25,7 @@ const Task = ({ value }) => {
       </div>
       <h1
         role="textbox"
-        contentEditable={editbtn === value.id}
+        contentEditable={editbtn === Number(value.id) ? "true" : "false"}
         suppressContentEditableWarning
         style={{ outlineColor: "blue" }}
         onInput={(e) => {
@@ -62,7 +41,7 @@ const Task = ({ value }) => {
       </h1>
       <p
         role="textbox"
-        contentEditable={editbtn === value.id}
+        contentEditable={editbtn === Number(value.id) ? "true" : "false"}
         suppressContentEditableWarning
         style={{ outlineColor: "blue" }}
         onInput={(e) => {
@@ -85,10 +64,8 @@ const Task = ({ value }) => {
             year: "numeric",
           })}
         </div>
-        {editbtn == value.id ? (
-          <button onClick={() => editnote(value.id)}>save</button>
-        ) : (
-          ""
+        {editbtn == Number(value.id) && (
+          <button onClick={() => editnotes(value.id)}>save</button>
         )}
       </div>
     </div>
